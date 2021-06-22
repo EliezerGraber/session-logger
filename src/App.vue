@@ -1,15 +1,41 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <LoggedOut v-if="!user"/>
+  <User v-else/>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import LoggedOut from './components/LoggedOut.vue'
+import User from './components/User.vue'
+import {db, auth, provider} from './firebase.js'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    LoggedOut,
+    User
+  },
+  data() {
+    return {
+      firebaseData: null,
+      user: null,
+    }
+  },
+  methods: {
+    
+  },
+  firestore: {
+    firebaseData: db.doc('test/a'),
+  },
+  created() {
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            this.user = user
+        }
+        else {
+          this.user = null
+        }
+    })
   }
 }
 </script>
