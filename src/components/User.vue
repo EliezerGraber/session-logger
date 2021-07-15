@@ -1,21 +1,32 @@
 <template>
-    <p>Hello, {{user.displayName}}</p>
-    <button @click="logOut">Log Out</button>
+    <button @click="this.$parent.$emit('log')">Log new session</button>
+    <button @click="viewToggle">{{button_text}}</button>
+    <ul v-if="viewing">
+        <li v-for="student in user_students" :key="student.name">{{student.name}}</li>
+    </ul>
 </template>
 
 <script>
-import {auth} from '../firebase.js'
-
 export default {
   name: 'User',
+  props: {
+      user: Object,
+      user_doc: Object,
+      user_students: Array,
+  },
   data() {
     return {
-      user: this.$parent.user
+        viewing: false,
+        button_text: "Show sessions",
     }
   },
+  emits: {
+      log: null
+  },
   methods: {
-    logOut() {
-        auth.signOut()
+    viewToggle() {
+        this.viewing = !this.viewing
+        this.button_text = this.viewing?"Hide sessions":"Show sessions"
     }
   },
 }
