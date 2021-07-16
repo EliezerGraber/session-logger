@@ -7,8 +7,10 @@
         </select>
         <label for="date">Date</label>
         <input id="date" type="date" v-model="date">
-        <label for="time">Time</label>
+        <label for="time">Start Time</label>
         <input id="time" type="time" v-model="start_time">
+        <label for="end_time">End Time</label>
+        <input id="end_time" type="time" v-model="end_time">
         <label for="goal">Long Term Goal</label>
         <select id="goal" v-model="long_term_goal" @change="updateOptions">
             <option v-for="goal in goal_col" :key="goal.name">{{goal.name}}</option>
@@ -24,8 +26,8 @@
         <label for="makeup_date" v-if="makeup">Makeup Date</label>
         <input id="makeup_date" v-if="makeup" type="date" v-model="makeup_date">
     </form>
-    <button>Cancel</button>
-    <button>Save</button>
+    <button @click="exit">Exit</button>
+    <button @click="save">Save</button>
 </template>
 
 <script>
@@ -46,6 +48,7 @@ export default {
         student: null,
         date: null,
         start_time: null,
+        end_time: null,
         long_term_goal: null,
         short_term_options: null,
         notes: null,
@@ -56,15 +59,52 @@ export default {
   },
   methods: {
       updateOptions()   {
-          db.collection(`goals`).where('name', '==', this.long_term_goal).get().then(snap =>{
-            if(snap.size == 1) {
-                this.$bind('option_col', db.doc(`goals/${snap.docs[0].id}`).collection('options'))
-            }
-            else {
-                console.log("Too many or too few documents with same long term goal name")
-            }
-          })
-      }
+            db.collection(`goals`).where('name', '==', this.long_term_goal).get().then(snap =>{
+                if(snap.size == 1) {
+                    this.$bind('option_col', db.doc(`goals/${snap.docs[0].id}`).collection('options'))
+                }
+                else {
+                    console.log("Too many or too few documents with same long term goal name")
+                }
+            })
+      },
+      reset() {
+            this.student = null
+            this.date = null
+            this.start_time = null
+            this.end_time = null
+            this.long_term_goal = null
+            this.short_term_options = null
+            this.notes = null
+            this.makeup = null
+            this.makeup_date = null
+            this.option_col = null
+      },
+      save() {
+            db.collection('logs').add({
+                student: this.student,
+                date: this.date,
+                start_time: this.start_time,
+                end_time: this.end_time,
+                long_term_goal: this.long_term_goal,
+                short_term_options: this.short_term_options,
+                notes: this.notes,
+                makeup: this.makeup,
+                makeup_date: this.makeup_date,
+                uid: this.user.uid,
+            })
+            this.reset()
+            this.$parent.$parent.state = 'dashboard'
+      },
+      exit() {
+          if(confirm("Are you sure you want to exit? Everything entered will be lost.")) {
+            this.reset()
+            this.$parent.$parent.state = 'dashboard'
+          }
+      },
+      changeStartTime() {
+          this.end_time = this.start_time
+      },
   },
 }
 </script>
