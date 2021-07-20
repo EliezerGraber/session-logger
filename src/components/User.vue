@@ -3,17 +3,17 @@
     <button @click="viewToggle">{{button_text}}</button>
     <table v-if="viewing">
         <tr>
-          <th>Student</th>
-          <th>Date</th>
-          <th>Start Time</th>
-          <th>End Time</th>
-          <th>Long Term Goal</th>
-          <th>Short Term Options</th>
-          <th>Notes</th>
-          <th>Makeup</th>
-          <th>Makeup Date</th>
+          <th @click='sort("student")'>Student</th>
+          <th @click='sort("date")'>Date</th>
+          <th @click='sort("start_time")'>Start Time</th>
+          <th @click='sort("end_time")'>End Time</th>
+          <th @click='sort("long_term_goal")'>Long Term Goal</th>
+          <th @click='sort("short_term_options")'>Short Term Options</th>
+          <th @click='sort("notes")'>Notes</th>
+          <th @click='sort("makeup")'>Makeup</th>
+          <th @click='sort("makeup_date")'>Makeup Date</th>
         </tr>
-        <tr v-for="log in ownedLogs" :key="log.id">
+        <tr v-for="log in sortedLogs" :key="log.id">
           <td>{{log.student}}</td>
           <td>{{log.date}}</td>
           <td>{{log.start_time}}</td>
@@ -44,6 +44,8 @@ export default {
     return {
         viewing: false,
         button_text: "Show sessions",
+        sort_mode: 'student',
+        sort_order: 1,
     }
   },
   emits: {
@@ -55,11 +57,25 @@ export default {
         return log.uid === this.user.uid
       })
     },
+    sortedLogs: function() {
+      return this.ownedLogs.sort((a,b) => {
+        return this.sort_order * ('' + a[this.sort_mode]).localeCompare(b[this.sort_mode])
+      })
+    },
   },
   methods: {
     viewToggle() {
       this.viewing = !this.viewing
       this.button_text = this.viewing?"Hide sessions":"Show sessions"
+    },
+    sort(mode) {
+      if(this.sort_mode === mode) {
+        this.sort_order *= -1
+      }
+      else {
+        this.sort_order = 1
+        this.sort_mode = mode
+      }
     },
   },
 }
