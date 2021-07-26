@@ -1,5 +1,10 @@
 <template>
     <button @click="this.$parent.$emit('log')">Log new session</button>
+    <form>
+      <label for='new_student_name'>New Student Name</label>
+      <input type='text' id='new_student_name' v-model="new_student_name">
+    </form>
+    <button @click="addStudent">Add student</button>
     <button @click="viewToggle">{{button_text}}</button>
     <table v-if="viewing">
         <tr>
@@ -32,6 +37,8 @@
 </template>
 
 <script>
+import {db} from '../firebase.js'
+
 export default {
   name: 'User',
   props: {
@@ -46,6 +53,7 @@ export default {
         button_text: "Show sessions",
         sort_mode: 'student',
         sort_order: 1,
+        new_student_name: null,
     }
   },
   emits: {
@@ -75,6 +83,11 @@ export default {
       else {
         this.sort_order = 1
         this.sort_mode = mode
+      }
+    },
+    addStudent() {
+      if(confirm(`Add a new student named ${this.new_student_name}?`)) {
+        db.doc(`users/${this.user.uid}`).collection('students').add({name: this.new_student_name})
       }
     },
   },

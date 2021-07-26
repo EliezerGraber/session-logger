@@ -10,6 +10,7 @@
     "core-js": "^3.6.5",
     "firebase": "^8.6.8",
     "vue": "^3.0.0",
+    "vue-router": "^4.0.10",
     "vuefire": "^3.0.0-alpha.2"
   },
   "devDependencies": {
