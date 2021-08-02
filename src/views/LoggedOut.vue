@@ -10,7 +10,9 @@ export default {
   name: 'LoggedOut',
   methods: {
     logIn() {
-        auth.signInWithPopup(provider)
+        auth.signInWithPopup(provider).then(() => {
+          this.$router.push('/dashboard')
+        })
     }
   },
 }

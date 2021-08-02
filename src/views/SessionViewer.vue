@@ -1,4 +1,5 @@
 <template>
+  <Nav/>
     <table>
         <tr>
           <th @click='sort("student")'>Student</th>
@@ -32,9 +33,13 @@
 <script>
 import {db} from '../firebase.js'
 import firebase from 'firebase/app'
+import Nav from '../components/Nav.vue'
 
 export default {
   name: 'Viewer',
+  components: {
+    Nav,
+  },
   data() {
     return {
         button_text: "Show sessions",
@@ -49,13 +54,13 @@ export default {
   computed: {
     ownedLogs: function() {
       const user = firebase.auth().currentUser
-      var sorted_docs = {}
+      var owned_docs = {}
       if (user !== null) {
-        sorted_docs = this.log_col.filter(log => {
+        owned_docs = this.log_col.filter(log => {
           return log.uid === user.uid
         })
       }
-    return sorted_docs
+      return owned_docs
     },
     sortedLogs: function() {
       return this.ownedLogs.sort((a,b) => {

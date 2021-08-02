@@ -1,4 +1,5 @@
 <template>
+    <Nav/>
     <h2>New Session</h2>
     <form>
         <label for="student">Student</label>
@@ -33,9 +34,13 @@
 <script>
 import {db, auth, provider} from '../firebase.js'
 import firebase from 'firebase/app'
+import Nav from '../components/Nav.vue'
 
 export default {
   name: 'SessionLogger',
+  components: {
+    Nav,
+  },
   data() {
     return {
         student: null,
@@ -103,12 +108,12 @@ export default {
                 uid: firebase.auth().currentUser.uid,
             })
             this.reset()
-            this.$router.push("/")
+            this.$router.push("/dashboard")
       },
       exit() {
           if(confirm("Are you sure you want to exit? Everything entered will be lost.")) {
             this.reset()
-            this.$router.push("/")
+            this.$router.push("/dashboard")
           }
       },
       changeStartTime() {

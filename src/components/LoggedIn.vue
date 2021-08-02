@@ -1,18 +1,6 @@
 <template>
-  <ul>
-    <li id='profile' class='dropdown'>
-      <p>Hello {{this.$parent.user.displayName}}</p>
-      <div class='dropdown_content'>
-          <div><p>{{this.$parent.user.email}}</p></div>
-          <div><button @click="logOut">Log Out</button></div>
-      </div>
-    </li>
-    <router-link to="/"><p>Home</p></router-link>
-    <router-link to="/log"><p>Log a session</p></router-link>
-    <router-link to="/view"><p>View sessions</p></router-link>
-    <router-link to="/adder"><p>Add a student</p></router-link>
-  </ul>
-  reminder to check if is user or admin
+  <Nav/>
+  reminder to check if is user or admin. put router-view in app, and nav in necessary components
   <router-view/>
 </template>
 
@@ -24,18 +12,15 @@
   </div>
 */
 import {auth} from '../firebase.js'
-import User from './User.vue'
-import Admin from './Admin.vue'
+//import User from './User.vue'
+//import Admin from './Admin.vue'
+import Nav from './Nav.vue'
+import firebase from 'firebase/app'
 
 export default {
   name: 'LoggedIn',
-  props: {
-    state: String,
-    log_col: Object,
-  },
   components: {
-    User,
-    Admin,
+    Nav,
   },
   data() {
     return {
@@ -44,6 +29,18 @@ export default {
   },
   emits: {
       log: null
+  },
+  computed: {
+    ownedLogs: function() {
+      const user = firebase.auth().currentUser
+      var owned_docs = null
+      if (user !== null) {
+        owned_docs = this.$parent.log_col.filter(log => {
+          return log.uid === user.uid
+        })
+      }
+      return owned_docs
+    },
   },
   methods: {
     logOut() {

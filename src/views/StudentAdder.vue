@@ -1,4 +1,5 @@
 <template>
+    <Nav/>
     <form>
       <label for='new_student_name'>New Student Name</label>
       <input type='text' id='new_student_name' v-model="new_student_name">
@@ -9,9 +10,13 @@
 <script>
 import {db} from '../firebase.js'
 import firebase from 'firebase/app'
+import Nav from '../components/Nav.vue'
 
 export default {
   name: 'Adder',
+  components: {
+    Nav,
+  },
   data() {
     return {
         new_student_name: null,
