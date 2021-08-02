@@ -6,6 +6,7 @@ import StudentAdder from "../views/StudentAdder.vue";
 import LoggedOut from "../views/LoggedOut.vue";
 import NoAccount from "../views/NoAccount.vue";
 import Invite from "../views/Invite.vue";
+import EditGoals from '../views/EditGoals'
 import firebase from 'firebase/app';
 import {db} from '../firebase.js';
 
@@ -44,6 +45,11 @@ const routes = [
     path: "/invite",
     name: "Invite",
     component: Invite
+  },
+  {
+    path: "/editgoals",
+    name: "EditGoals",
+    component: EditGoals
   },
   {
     path: "/:catchAll(.*)",

@@ -12,6 +12,7 @@
     <router-link v-if="ownedLogs.length>0" to="/view"><p>View sessions</p></router-link>
     <router-link to="/adder"><p>Add a student</p></router-link>
     <router-link v-if='isAdmin' to="/invite"><p>Invite new user</p></router-link>
+    <router-link v-if='isAdmin' to="/editgoals"><p>Edit goals</p></router-link>
   </ul>
 </template>
 
@@ -77,7 +78,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 ul {
   list-style-type: none;
   margin: 0;
