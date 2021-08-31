@@ -17,17 +17,18 @@
           <td>{{log.date}}</td>
           <td>{{log.start_time}}</td>
           <td>{{log.end_time}}</td>
-          <td>
+          <td class="section">
             <ul>
-              <li v-for="section in log.sections" :key="section.id">{{section.goal}} - {{section.option}}</li>
+              <li v-for="section in log.sections" :key="section.id">{{section.goal}} - {{section.option}} <br> <p v-if="curViewing(log.id)">{{section.notes}}</p></li>
             </ul>
           </td>
           <td>{{log.location}}</td>
           <td>{{log.makeup}}</td>
           <td>{{log.makeup_date}}</td>
           <td>{{log.submitted}}</td>
-          <td><button @click="deleteLog(log.id)">Delete</button></td>
-          <td><button @click="editLog(log.id)">Edit</button></td>
+          <td class='button'><button @click="deleteLog(log.id)">Delete</button></td>
+          <td class='button'><button @click="editLog(log.id)">Edit</button></td>
+          <td class='open-button'><button @click="viewLog(log.id)">{{open_button(log.id)}}</button></td>
         </tr>
     </table>
 </template>
@@ -48,6 +49,7 @@ export default {
         sort_mode: 'student',
         sort_order: 1,
         log_col: null,
+        viewing: null,
     }
   },
   firestore: {
@@ -71,6 +73,9 @@ export default {
     },
   },
   methods: {
+    open_button: function(id) {
+      return id == this.viewing ? 'Collapse' : 'Open'
+    },
     sort(mode) {
       if(this.sort_mode === mode) {
         this.sort_order *= -1
@@ -88,6 +93,42 @@ export default {
     editLog(id) {
       this.$router.push(`/log/${id}`)
     },
+    viewLog(id) {
+      this.viewing = this.viewing == id ? null : id
+    },
+    curViewing(id) {
+      return this.viewing == id
+    },
   },
 }
 </script>
+
+<style scoped>
+table tr:nth-child(even) {
+  background-color: #cecece;
+}
+
+table th {
+  height: 3em;
+}
+
+.button, .open-button {
+  text-align: center;
+  vertical-align: text-top;
+  padding: 0.5em;
+}
+
+.open-button {
+  width: 60px;
+}
+
+.section {
+  width: 100%;
+}
+
+
+
+table {
+  width: 100%
+}
+</style>
