@@ -10,28 +10,20 @@
     </div>
     <div v-else>
         <button @click="back">Back</button>
-        <form>
-            <label for="goal_name">Goal Name</label>
-            <input id="goal_name" type="text" v-model="goal_name">
-            <h4>Options</h4>
-            <ul>
-                <li type="text" v-for="option in selected_option_col" :key="option.name" @click="deleteOption(option.name)">{{option.name}}</li>
-            </ul>            
-        </form>
-        <input id="option_name" type="text" v-model="option_name">
-        <button @click="addOption">Add Option</button>
-        <button @click="deleteGoal">Delete Goal</button>
+        <OptionEditor :selected_goal="selected_goal" :goal_name="goal_name"/>
     </div>
 </template>
 
 <script>
 import {db} from '../firebase.js'
 import Nav from '../components/Nav.vue'
+import OptionEditor from '../components/OptionEditor.vue'
 
 export default {
   name: 'EditGoals',
   components: {
     Nav,
+    OptionEditor,
   },
   data() {
     return {
@@ -55,13 +47,13 @@ export default {
                     this.selected_goal = snap.docs[0]
                     this.$bind('selected_option_col', db.doc(`goals/${snap.docs[0].id}`).collection('options'))
                     this.goal_name = goal
+                    this.edit_mode = true
                 }
                 else {
                     console.log("Too many or too few documents with same long term goal name")
                 }
             })
         }
-        this.edit_mode = true
     },
     addGoal() {
         db.collection(`goals`).add({

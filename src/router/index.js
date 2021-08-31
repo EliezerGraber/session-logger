@@ -22,7 +22,7 @@ const routes = [
     component: LoggedOut
   },
   {
-    path: "/log",
+    path: "/log/:id",
     name: "Logger",
     component: SessionLogger
   },

@@ -6,9 +6,8 @@
           <th @click='sort("date")'>Date</th>
           <th @click='sort("start_time")'>Start Time</th>
           <th @click='sort("end_time")'>End Time</th>
-          <th @click='sort("long_term_goal")'>Long Term Goal</th>
-          <th @click='sort("short_term_options")'>Short Term Options</th>
-          <th @click='sort("notes")'>Notes</th>
+          <th @click='sort("sections")'>Sections</th>
+          <th @click='sort("location")'>Location</th>
           <th @click='sort("makeup")'>Makeup</th>
           <th @click='sort("makeup_date")'>Makeup Date</th>
         </tr>
@@ -17,15 +16,16 @@
           <td>{{log.date}}</td>
           <td>{{log.start_time}}</td>
           <td>{{log.end_time}}</td>
-          <td>{{log.long_term_goal}}</td>
           <td>
             <ul>
-              <li v-for="option in log.short_term_options" :key="option">{{option}}</li>
+              <li v-for="section in log.sections" :key="section.id">{{section.goal}} - {{section.option}}</li>
             </ul>
           </td>
-          <td>{{log.notes}}</td>
+          <td>{{log.location}}</td>
           <td>{{log.makeup}}</td>
           <td>{{log.makeup_date}}</td>
+          <td><button @click="deleteLog(log.id)">Delete</button></td>
+          <td><button @click="editLog(log.id)">Edit</button></td>
         </tr>
     </table>
 </template>
@@ -77,6 +77,14 @@ export default {
         this.sort_order = 1
         this.sort_mode = mode
       }
+    },
+    deleteLog(id) {
+      if(confirm(`Are you sure you would like to delete this log?`)) {
+        db.doc(`logs/${id}`).delete()
+      }
+    },
+    editLog(id) {
+      this.$router.push(`/log/${id}`)
     },
   },
 }
