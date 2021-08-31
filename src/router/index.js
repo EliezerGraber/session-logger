@@ -33,7 +33,7 @@ const routes = [
   },
   {
     path: "/adder",
-    name: "Adderer",
+    name: "Adder",
     component: StudentAdder
   },
   {
@@ -44,12 +44,18 @@ const routes = [
   {
     path: "/invite",
     name: "Invite",
-    component: Invite
+    component: Invite,
+    meta: {
+      admin: true,
+    }
   },
   {
     path: "/editgoals",
     name: "EditGoals",
-    component: EditGoals
+    component: EditGoals,
+    meta: {
+      admin: true,
+    }
   },
   {
     path: "/:catchAll(.*)",
@@ -75,9 +81,26 @@ function isInvited(email) {
   return db.collection(`invites`).where('email', '==', email).get()
 }
 
+async function isAdmin(uid) {
+  return await db.doc(`users/${uid}`).get().then(doc => {
+    return doc.data().is_admin
+  })
+}
+
 //reroute to /loggedout if not logged in
 router.beforeEach(async (to, from, next) => {
   if (to.name !== 'LoggedOut' && await firebase.getCurrentUser() === null) next({ name: 'LoggedOut' })
+  else next()
+})
+
+//reroute to /dashboard from admin routes if no admin permissions
+router.beforeEach(async (to, from, next) => {
+  if (to.name == 'LoggedOut') {
+    next()
+    return
+  }
+  const user = await firebase.getCurrentUser()
+  if (to.matched.some(record => record.meta.admin) && !await isAdmin(user.uid)) next({name: 'Home'})
   else next()
 })
 
