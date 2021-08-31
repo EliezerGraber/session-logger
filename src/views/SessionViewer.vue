@@ -10,6 +10,7 @@
           <th @click='sort("location")'>Location</th>
           <th @click='sort("makeup")'>Makeup</th>
           <th @click='sort("makeup_date")'>Makeup Date</th>
+          <th @click='sort("submitted")'>Submitted</th>
         </tr>
         <tr v-for="log in sortedLogs" :key="log.id">
           <td>{{log.student}}</td>
@@ -24,6 +25,7 @@
           <td>{{log.location}}</td>
           <td>{{log.makeup}}</td>
           <td>{{log.makeup_date}}</td>
+          <td>{{log.submitted}}</td>
           <td><button @click="deleteLog(log.id)">Delete</button></td>
           <td><button @click="editLog(log.id)">Edit</button></td>
         </tr>

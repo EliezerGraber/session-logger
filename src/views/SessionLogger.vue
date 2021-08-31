@@ -1,33 +1,35 @@
 <template>
     <Nav/>
     <h2>New Session</h2>
-    <label for="student">Student</label>
-    <select id="student" v-model="student" @change="getStudentGoals">
-        <option v-for="student in user_students" :key="student.name">{{student.name}}</option>
-    </select>
-    <label for="date">Date</label>
-    <input id="date" type="date" v-model="date">
-    <label for="time">Start Time</label>
-    <input id="time" type="time" v-model="start_time">
-    <label for="end_time">End Time</label>
-    <input id="end_time" type="time" v-model="end_time">
-    <label for="location">Location</label>
-    <select id="location" v-model="location">
-        <option>School</option>
-        <option>Remote</option>
-        <option>Home</option>
-    </select>
-    <label for="makeup">Makeup</label>
-    <input id="makeup" type="checkbox" v-model="makeup">
-    <label for="makeup_date" v-if="makeup">Makeup Date</label>
-    <input id="makeup_date" v-if="makeup" type="date" v-model="makeup_date">
-    <div v-for="section in sections" :key="section.id">
-        <label for="notes">{{section.goal}} - {{section.option}} notes</label>
-        <button @click="deleteSection(section.id, section.goal, section.option)">Delete</button>
-        <textarea id="notes" type="text" v-model="section.notes"></textarea>
+    <div @change="autosave">
+        <label for="student">Student</label>
+        <select id="student" v-model="student" @change="getStudentGoals">
+            <option v-for="student in user_students" :key="student.name">{{student.name}}</option>
+        </select>
+        <label for="date">Date</label>
+        <input id="date" type="date" v-model="date">
+        <label for="time">Start Time</label>
+        <input id="time" type="time" v-model="start_time">
+        <label for="end_time">End Time</label>
+        <input id="end_time" type="time" v-model="end_time">
+        <label for="location">Location</label>
+        <select id="location" v-model="location">
+            <option>School</option>
+            <option>Remote</option>
+            <option>Home</option>
+        </select>
+        <label for="makeup">Makeup</label>
+        <input id="makeup" type="checkbox" v-model="makeup">
+        <label for="makeup_date" v-if="makeup">Makeup Date</label>
+        <input id="makeup_date" v-if="makeup" type="date" v-model="makeup_date">
+        <div v-for="section in sections" :key="section.id">
+            <label for="notes">{{section.goal}} - {{section.option}} notes</label>
+            <button @click="deleteSection(section.id, section.goal, section.option)">Delete</button>
+            <textarea id="notes" type="text" v-model="section.notes"></textarea>
+        </div>
     </div>
-    <button @click="exit">Exit</button>
-    <button @click="save">Save</button>
+    <button @click="exit">Exit (keep progress)</button>
+    <button @click="submit">Submit</button>
     <h3>Add a new progress section</h3>
     <label for="goal">Long Term Goal</label>
     <select id="goal" v-model="long_term_goal" @change="updateOptions">
@@ -48,6 +50,7 @@
 import {db, auth, provider} from '../firebase.js'
 import firebase from 'firebase/app'
 import Nav from '../components/Nav.vue'
+import _ from 'lodash'
 
 export default {
   name: 'SessionLogger',
@@ -75,6 +78,8 @@ export default {
         custom_option: null,
         current_student: null,
         current_student_id: null,
+        log_id: null,
+        submitted: false
     }
   },
   created() {
@@ -88,8 +93,8 @@ export default {
     })
     db.doc(`logs/${this.$route.params.id}`).get().then(doc => {
         if(doc.data() != null) {
-            console.log(doc.data())
             this.load(doc.data())
+            this.log_id = this.$route.params.id
         }
         else {
             this.reset()
@@ -121,7 +126,11 @@ export default {
             this.makeup_date = null
             this.option_col = null
       },
-      save() {
+      autosave: _.debounce(function() {
+          this.save()
+      }, 2000),
+      async save() {
+            console.log('saved')
             const log = {
                 student: this.student,
                 date: this.date,
@@ -132,21 +141,25 @@ export default {
                 makeup: this.makeup,
                 makeup_date: this.makeup_date,
                 uid: firebase.auth().currentUser.uid,
+                submitted: this.submitted,
             }
             if(this.new_log) {
-                db.collection('logs').add(log)
+                const res = await db.collection('logs').add(log)
+                this.new_log = false
+                this.log_id = res.id
             }
             else {
-                db.doc(`logs/${this.$route.params.id}`).set(log)
+                db.doc(`logs/${this.log_id}`).set(log)
             }
-            this.reset()
-            this.$router.push("/dashboard")
       },
       exit() {
-          if(confirm("Are you sure you want to exit? Everything entered will be lost.")) {
-            this.reset()
-            this.$router.push("/dashboard")
-          }
+        this.save()
+        this.reset()
+        this.$router.push("/view")
+      },
+      submit() {
+          this.submitted = true
+          this.exit()
       },
       changeStartTime() {
           this.end_time = this.start_time
@@ -174,7 +187,6 @@ export default {
         }
       },
       load(log) {
-        console.log(log)
         this.student = log.student
         this.date = log.date
         this.start_time = log.start_time
