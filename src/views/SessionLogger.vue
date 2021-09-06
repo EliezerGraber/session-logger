@@ -1,6 +1,6 @@
 <template>
     <Nav/>
-    <h2>New Session</h2>
+    <h2>{{session_action}} Session</h2>
     <div @change="autosave">
         <label for="student">Student</label>
         <select id="student" v-model="student" @change="getStudentGoals">
@@ -51,6 +51,7 @@ import {db, auth, provider} from '../firebase.js'
 import firebase from 'firebase/app'
 import Nav from '../components/Nav.vue'
 import _ from 'lodash'
+import moment from 'moment'
 
 export default {
   name: 'SessionLogger',
@@ -79,7 +80,8 @@ export default {
         current_student: null,
         current_student_id: null,
         log_id: null,
-        submitted: false
+        submitted: false,
+        session_action: null,
     }
   },
   created() {
@@ -95,24 +97,31 @@ export default {
         if(doc.data() != null) {
             this.load(doc.data())
             this.log_id = this.$route.params.id
+            this.getStudentGoals()
+            this.session_action = 'Edit'
         }
         else {
             this.reset()
+            const today = new Date();
+            this.date = moment(today).format('yyyy-MM-DD')
+            this.start_time = moment(today).format('HH:mm:ss')
+            this.end_time = moment(today).add(1, 'hours').format('HH:mm:ss')
+            this.session_action = 'New'
         }
     })
   },
   methods: {
       updateOptions() {
-            const user = firebase.auth().currentUser
-            db.collection(`users/${user.uid}/students/${this.current_student_id}/goals`).where('name', '==', this.long_term_goal).get().then(snap =>{
-                if(snap.size == 1) {
-                    this.$bind('option_col', db.doc(`users/${user.uid}/students/${this.current_student_id}/goals/${snap.docs[0].id}`).collection('options'))
-                }
-                else {
-                    this.$unbind('option_col')
-                    console.log("Too many or too few documents with same long term goal name")
-                }
-            })
+        const user = firebase.auth().currentUser
+        db.collection(`users/${user.uid}/students/${this.current_student_id}/goals`).where('name', '==', this.long_term_goal).get().then(snap =>{
+            if(snap.size == 1) {
+                this.$bind('option_col', db.doc(`users/${user.uid}/students/${this.current_student_id}/goals/${snap.docs[0].id}`).collection('options'))
+            }
+            else {
+                this.$unbind('option_col')
+                console.log("Too many or too few documents with same long term goal name")
+            }
+        })
       },
       reset() {
             this.student = null
@@ -152,14 +161,14 @@ export default {
                 db.doc(`logs/${this.log_id}`).set(log)
             }
       },
-      exit() {
-        this.save()
-        this.reset()
+      async exit() {
+        await this.save()
+        //this.reset()
         this.$router.push("/view")
       },
-      submit() {
-          this.submitted = true
-          this.exit()
+      async submit() {
+        this.submitted = true
+        await this.exit()
       },
       changeStartTime() {
           this.end_time = this.start_time

@@ -55,6 +55,7 @@ export default {
         current_student_id: null,
         goal_name: null,
         selected_goal: null,
+        custom_goal: null,
     }
   },
   created() {
@@ -114,12 +115,39 @@ export default {
         })
         this.mode = 1
     },
-    addGoal() {
+    async addGoal() {
         const user = firebase.auth().currentUser
         const chosen_goal = this.long_term_goal != 'Custom' ? this.long_term_goal : this.custom_goal
-        db.collection(`users/${user.uid}/students/${this.current_student_id}/goals`).add({
+        console.log(chosen_goal)
+        if(chosen_goal == null) return
+        if(!await db.collection(`users/${user.uid}/students/${this.current_student_id}/goals`).where('name', '==', chosen_goal).get().then(snap =>{
+            if(snap.size != 0) {
+                return false
+            }
+            else {
+                return true
+            }
+        })) return
+        const goal = await db.collection(`users/${user.uid}/students/${this.current_student_id}/goals`).add({
             name: chosen_goal
         })
+        if(this.long_term_goal != 'Custom') {
+            db.collection(`goals`).where('name', '==', this.long_term_goal).get().then(snap =>{
+                if(snap.size == 1) {
+                    db.doc(`goals/${snap.docs[0].id}`).collection('options').get().then(col => {
+                        col.forEach(doc => {
+                            db.collection(`users/${user.uid}/students/${this.current_student_id}/goals/${goal.id}/options`).add({
+                                name: doc.data().name,
+                            })
+                        })
+                    })
+                    
+                }
+                else {
+                    console.log("Too many or too few documents with same long term goal name")
+                }
+            })
+        }
     },
     editGoal(goal) {
         const user = firebase.auth().currentUser

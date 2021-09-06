@@ -61,10 +61,11 @@ export default {
         }
     },
     deleteGoal() {
-        if(confirm("Are you sure you would like to delete this goal?")) {
-            db.doc(`${this.goal_path}/${this.selected_goal.id}`).delete()
-            this.$parent.edit_mode = false
-        }
+      if(confirm("Are you sure you would like to delete this goal?")) {
+          db.doc(`${this.goal_path}/${this.selected_goal.id}`).delete()
+          this.$parent.edit_mode = false
+      }
+      this.$parent.back()
     }
   },
 }
